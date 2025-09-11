@@ -11,12 +11,15 @@ interface Product {
   originalPrice?: number;
   image: string;
   category: string;
+  subcategory?: string;
   isNew?: boolean;
   onSale?: boolean;
 }
 
 interface ProductGridProps {
   products: Product[];
+  selectedCategory?: string;
+  selectedSubcategory?: string;
   onProductClick?: (productId: string) => void;
   onAddToCart?: (productId: string) => void;
   onWishlist?: (productId: string) => void;
@@ -24,21 +27,30 @@ interface ProductGridProps {
 
 export default function ProductGrid({
   products,
+  selectedCategory,
+  selectedSubcategory,
   onProductClick,
   onAddToCart,
   onWishlist,
 }: ProductGridProps) {
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [localSelectedCategory, setLocalSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
 
-  // Get unique categories
+  // Get unique categories and subcategories
   const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))];
+  const subcategories = selectedCategory && selectedCategory !== "all" 
+    ? ["all", ...Array.from(new Set(products.filter(p => p.category === selectedCategory).map(p => p.subcategory).filter(Boolean)))]
+    : [];
 
   // Filter and sort products
   const filteredProducts = products
-    .filter(product => selectedCategory === "all" || product.category === selectedCategory)
+    .filter(product => {
+      const categoryMatch = selectedCategory === "all" || product.category === selectedCategory || !selectedCategory;
+      const subcategoryMatch = selectedSubcategory === "all" || product.subcategory === selectedSubcategory || !selectedSubcategory;
+      return categoryMatch && subcategoryMatch;
+    })
     .sort((a, b) => {
       switch (sortBy) {
         case "price-low":
@@ -58,7 +70,7 @@ export default function ProductGrid({
   const paginatedProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
 
   const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
+    setLocalSelectedCategory(category);
     setCurrentPage(1);
   };
 
@@ -137,14 +149,19 @@ export default function ProductGrid({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-          {paginatedProducts.map((product) => (
-            <ProductCard
+          {paginatedProducts.map((product, index) => (
+            <div
               key={product.id}
-              {...product}
-              onAddToCart={onAddToCart}
-              onQuickView={onProductClick}
-              onWishlist={onWishlist}
-            />
+              className="animate-in fade-in-0 duration-500"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <ProductCard
+                {...product}
+                onAddToCart={onAddToCart}
+                onQuickView={onProductClick}
+                onWishlist={onWishlist}
+              />
+            </div>
           ))}
         </div>
       )}

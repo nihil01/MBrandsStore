@@ -1,15 +1,23 @@
 import { useState } from "react";
-import { Search, ShoppingBag, Menu, X, User } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 interface HeaderProps {
   cartItemCount?: number;
   onCartClick?: () => void;
   onSearchChange?: (query: string) => void;
+  onCategorySelect?: (category: string, subcategory?: string) => void;
 }
 
-export default function Header({ cartItemCount = 0, onCartClick, onSearchChange }: HeaderProps) {
+export default function Header({ cartItemCount = 0, onCartClick, onSearchChange, onCategorySelect }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -19,7 +27,13 @@ export default function Header({ cartItemCount = 0, onCartClick, onSearchChange 
     onSearchChange?.(value);
   };
 
-  const navItems = ["New Arrivals", "Men", "Women", "Accessories", "Sale"];
+  const categories = {
+    "New Arrivals": [],
+    "Men": ["T-Shirts", "Jeans", "Jackets", "Shoes", "Accessories"],
+    "Women": ["Tops", "Dresses", "Jeans", "Jackets", "Shoes", "Bags"],
+    "Accessories": ["Bags", "Belts", "Hats", "Watches", "Jewelry"],
+    "Sale": []
+  };
 
   return (
     <header className="bg-background border-b border-border sticky top-0 z-50">
@@ -31,17 +45,54 @@ export default function Header({ cartItemCount = 0, onCartClick, onSearchChange 
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-foreground hover:text-primary transition-colors"
-                data-testid={`nav-${item.toLowerCase().replace(' ', '-')}`}
-              >
-                {item}
-              </a>
-            ))}
+          <nav className="hidden md:flex items-center">
+            <NavigationMenu>
+              <NavigationMenuList className="flex space-x-2">
+                {Object.entries(categories).map(([category, subcategories]) => (
+                  <NavigationMenuItem key={category}>
+                    {subcategories.length > 0 ? (
+                      <>
+                        <NavigationMenuTrigger 
+                          className="text-foreground hover:text-primary transition-colors bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent"
+                          data-testid={`nav-${category.toLowerCase().replace(' ', '-')}`}
+                        >
+                          {category}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <div className="grid w-[200px] gap-1 p-2">
+                            <button
+                              onClick={() => onCategorySelect?.(category)}
+                              className="text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
+                              data-testid={`nav-${category.toLowerCase().replace(' ', '-')}-all`}
+                            >
+                              All {category}
+                            </button>
+                            {subcategories.map((subcategory) => (
+                              <button
+                                key={subcategory}
+                                onClick={() => onCategorySelect?.(category, subcategory)}
+                                className="text-left px-3 py-2 text-sm hover:bg-accent rounded-md transition-colors"
+                                data-testid={`nav-${category.toLowerCase().replace(' ', '-')}-${subcategory.toLowerCase().replace(' ', '-')}`}
+                              >
+                                {subcategory}
+                              </button>
+                            ))}
+                          </div>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => onCategorySelect?.(category)}
+                        className="px-4 py-2 text-foreground hover:text-primary transition-colors"
+                        data-testid={`nav-${category.toLowerCase().replace(' ', '-')}`}
+                      >
+                        {category}
+                      </button>
+                    )}
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
           </nav>
 
           {/* Search Bar */}
@@ -113,18 +164,38 @@ export default function Header({ cartItemCount = 0, onCartClick, onSearchChange 
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4">
+          <nav className="md:hidden mt-4 pb-4 border-t border-border pt-4 animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col space-y-3">
-              {navItems.map((item) => (
-                <a
-                  key={item}
-                  href="#"
-                  className="text-foreground hover:text-primary transition-colors py-2"
-                  data-testid={`nav-mobile-${item.toLowerCase().replace(' ', '-')}`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item}
-                </a>
+              {Object.entries(categories).map(([category, subcategories]) => (
+                <div key={category} className="space-y-2">
+                  <button
+                    onClick={() => {
+                      onCategorySelect?.(category);
+                      setIsMenuOpen(false);
+                    }}
+                    className="text-foreground hover:text-primary transition-colors py-2 text-left font-medium"
+                    data-testid={`nav-mobile-${category.toLowerCase().replace(' ', '-')}`}
+                  >
+                    {category}
+                  </button>
+                  {subcategories.length > 0 && (
+                    <div className="pl-4 space-y-2">
+                      {subcategories.map((subcategory) => (
+                        <button
+                          key={subcategory}
+                          onClick={() => {
+                            onCategorySelect?.(category, subcategory);
+                            setIsMenuOpen(false);
+                          }}
+                          className="text-muted-foreground hover:text-foreground transition-colors py-1 text-left block text-sm"
+                          data-testid={`nav-mobile-${category.toLowerCase().replace(' ', '-')}-${subcategory.toLowerCase().replace(' ', '-')}`}
+                        >
+                          {subcategory}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </nav>

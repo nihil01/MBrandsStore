@@ -6,6 +6,7 @@ export default function HeaderExample() {
       cartItemCount={3}
       onCartClick={() => console.log('Cart clicked')}
       onSearchChange={(query) => console.log('Search:', query)}
+      onCategorySelect={(category, subcategory) => console.log('Category selected:', category, subcategory)}
     />
   );
 }

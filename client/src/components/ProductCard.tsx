@@ -50,7 +50,7 @@ export default function ProductCard({
   };
 
   return (
-    <Card className="group hover-elevate overflow-hidden border-0 shadow-sm" data-testid={`product-card-${id}`}>
+    <Card className="group hover-elevate overflow-hidden border-0 shadow-sm transform transition-all duration-300 hover:-translate-y-1 animate-in fade-in-0 duration-500" data-testid={`product-card-${id}`}>
       <CardContent className="p-0">
         {/* Image Container */}
         <div className="relative aspect-square overflow-hidden bg-muted">
@@ -84,7 +84,7 @@ export default function ProductCard({
           </div>
 
           {/* Actions */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
             <Button
               size="icon"
               variant="secondary"
@@ -97,11 +97,11 @@ export default function ProductCard({
           </div>
 
           {/* Quick View Button */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
             <Button
               variant="outline"
               onClick={handleQuickView}
-              className="bg-background/80 backdrop-blur-sm"
+              className="bg-background/80 backdrop-blur-sm transform scale-95 group-hover:scale-100 transition-transform duration-200"
               data-testid={`button-quick-view-${id}`}
             >
               Quick View
@@ -133,7 +133,7 @@ export default function ProductCard({
           {/* Add to Cart */}
           <Button
             onClick={handleAddToCart}
-            className="w-full gap-2"
+            className="w-full gap-2 transform transition-all duration-200 hover:scale-105 active:scale-95"
             data-testid={`button-add-to-cart-${id}`}
           >
             <Plus className="w-4 h-4" />

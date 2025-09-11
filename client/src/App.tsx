@@ -29,6 +29,7 @@ interface Product {
   originalPrice?: number;
   image: string;
   category: string;
+  subcategory: string;
   description: string;
   sizes: string[];
   colors: string[];
@@ -53,6 +54,8 @@ function HomePage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
 
   // TODO: Remove mock data functionality
   const mockProducts: Product[] = [
@@ -62,7 +65,8 @@ function HomePage() {
       price: 49.99,
       originalPrice: 69.99,
       image: tshirtImage,
-      category: "T-Shirts",
+      category: "Men",
+      subcategory: "T-Shirts",
       description: "Made from 100% organic cotton, this premium t-shirt offers unmatched comfort and style. Perfect for casual wear or layering, featuring a modern fit that flatters every body type.",
       sizes: ["XS", "S", "M", "L", "XL", "XXL"],
       colors: ["white", "black", "navy", "gray"],
@@ -76,7 +80,8 @@ function HomePage() {
       name: "Slim Fit Denim Jeans",
       price: 89.99,
       image: jeansImage,
-      category: "Jeans",
+      category: "Men",
+      subcategory: "Jeans",
       description: "Classic slim-fit jeans crafted from premium denim with a comfortable stretch. Features a modern cut that works perfectly for both casual and smart-casual looks.",
       sizes: ["28", "30", "32", "34", "36", "38"],
       colors: ["blue", "black", "gray"],
@@ -91,7 +96,8 @@ function HomePage() {
       price: 249.99,
       originalPrice: 299.99,
       image: jacketImage,
-      category: "Jackets",
+      category: "Men",
+      subcategory: "Jackets",
       description: "Genuine leather biker jacket with modern styling. Features asymmetrical zip closure, multiple pockets, and a comfortable lining. A timeless piece that adds edge to any outfit.",
       sizes: ["S", "M", "L", "XL"],
       colors: ["black", "brown"],
@@ -105,7 +111,8 @@ function HomePage() {
       name: "Athletic Sneakers",
       price: 129.99,
       image: sneakersImage,
-      category: "Shoes",
+      category: "Men",
+      subcategory: "Shoes",
       description: "High-performance athletic sneakers designed for both style and comfort. Features breathable mesh upper, cushioned midsole, and durable rubber outsole.",
       sizes: ["7", "8", "9", "10", "11", "12"],
       colors: ["white", "black", "gray"],
@@ -119,7 +126,8 @@ function HomePage() {
       name: "Classic White Tee",
       price: 39.99,
       image: tshirtImage,
-      category: "T-Shirts",
+      category: "Women",
+      subcategory: "Tops",
       description: "Essential white t-shirt made from soft cotton blend. Perfect basics piece that goes with everything in your wardrobe.",
       sizes: ["XS", "S", "M", "L", "XL"],
       colors: ["white"],
@@ -133,7 +141,8 @@ function HomePage() {
       name: "Dark Wash Jeans",
       price: 79.99,
       image: jeansImage,
-      category: "Jeans",
+      category: "Women",
+      subcategory: "Jeans",
       description: "Dark wash jeans with regular fit. Made from durable denim with subtle fading for a lived-in look.",
       sizes: ["28", "30", "32", "34", "36"],
       colors: ["blue"],
@@ -147,7 +156,8 @@ function HomePage() {
       name: "Sports Jacket",
       price: 189.99,
       image: jacketImage,
-      category: "Jackets",
+      category: "Women",
+      subcategory: "Jackets",
       description: "Versatile sports jacket that bridges casual and formal wear. Features modern tailoring and high-quality fabric.",
       sizes: ["S", "M", "L", "XL", "XXL"],
       colors: ["black", "navy"],
@@ -162,7 +172,8 @@ function HomePage() {
       price: 149.99,
       originalPrice: 179.99,
       image: sneakersImage,
-      category: "Shoes",
+      category: "Accessories",
+      subcategory: "Bags",
       description: "Professional running shoes with advanced cushioning technology. Lightweight design for optimal performance.",
       sizes: ["7", "8", "9", "10", "11"],
       colors: ["white", "black"],
@@ -173,11 +184,23 @@ function HomePage() {
     }
   ];
 
-  // Filter products based on search
-  const filteredProducts = mockProducts.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter products based on search and category
+  const filteredProducts = mockProducts.filter(product => {
+    const searchMatch = searchQuery === "" || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.subcategory.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const categoryMatch = selectedCategory === "" || 
+      selectedCategory === "New Arrivals" ||
+      selectedCategory === "Sale" ||
+      product.category === selectedCategory;
+    
+    const subcategoryMatch = selectedSubcategory === "" || 
+      product.subcategory === selectedSubcategory;
+
+    return searchMatch && categoryMatch && subcategoryMatch;
+  });
 
   const handleProductClick = (productId: string) => {
     const product = mockProducts.find(p => p.id === productId);
@@ -249,6 +272,15 @@ function HomePage() {
     document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleCategorySelect = (category: string, subcategory?: string) => {
+    setSelectedCategory(category);
+    setSelectedSubcategory(subcategory || "");
+    // Scroll to products section
+    setTimeout(() => {
+      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -257,6 +289,7 @@ function HomePage() {
           cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
           onCartClick={() => setIsCartOpen(true)}
           onSearchChange={setSearchQuery}
+          onCategorySelect={handleCategorySelect}
         />
         <ThemeToggle />
       </div>
@@ -271,6 +304,8 @@ function HomePage() {
       <div id="products">
         <ProductGrid
           products={filteredProducts}
+          selectedCategory={selectedCategory}
+          selectedSubcategory={selectedSubcategory}
           onProductClick={handleProductClick}
           onAddToCart={(id) => handleAddToCart(id)}
           onWishlist={(id) => console.log('Added to wishlist:', id)}
