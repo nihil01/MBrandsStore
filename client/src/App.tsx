@@ -213,16 +213,33 @@ function HomePage() {
 
   // Filter products based on search and category
   const allProducts = products.length > 0 ? products : mockProducts;
+  
+  // Map category IDs to names for filtering
+  const categoryMap = categories.reduce((acc: any, cat: any) => {
+    acc[cat.name] = cat.id;
+    return acc;
+  }, {});
+
   const filteredProducts = allProducts.filter(product => {
     const searchMatch = searchQuery === "" || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.subcategory.toLowerCase().includes(searchQuery.toLowerCase());
+      product.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.subcategory?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const categoryMatch = selectedCategory === "" || 
-      selectedCategory === "New Arrivals" ||
-      selectedCategory === "Sale" ||
-      product.category === selectedCategory;
+    let categoryMatch = true;
+    if (selectedCategory && selectedCategory !== "" && selectedCategory !== "New Arrivals" && selectedCategory !== "Sale") {
+      // For API products, match by categoryId
+      if (product.categoryId) {
+        categoryMatch = product.categoryId === categoryMap[selectedCategory];
+      } else {
+        // For mock products, match by category name
+        categoryMatch = product.category === selectedCategory;
+      }
+    } else if (selectedCategory === "New Arrivals") {
+      categoryMatch = product.isNew === true;
+    } else if (selectedCategory === "Sale") {
+      categoryMatch = product.onSale === true;
+    }
     
     const subcategoryMatch = selectedSubcategory === "" || 
       product.subcategory === selectedSubcategory;
