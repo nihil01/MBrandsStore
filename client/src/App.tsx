@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -57,7 +57,34 @@ function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
 
-  // TODO: Remove mock data functionality
+  // Fetch products from API
+  const { data: products = [], isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['/api/products'],
+    queryFn: async () => {
+      const response = await fetch('/api/products');
+      if (!response.ok) throw new Error('Failed to fetch products');
+      const data = await response.json();
+      // Transform the API data to match our interface
+      return data.map((product: any) => ({
+        ...product,
+        price: parseFloat(product.price),
+        originalPrice: product.originalPrice ? parseFloat(product.originalPrice) : undefined,
+        rating: parseFloat(product.rating),
+      }));
+    }
+  });
+
+  // Fetch categories from API
+  const { data: categories = [] } = useQuery({
+    queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await fetch('/api/categories');
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return response.json();
+    }
+  });
+
+  // TODO: Remove mock data functionality - keeping for fallback during development
   const mockProducts: Product[] = [
     {
       id: "1",
@@ -185,7 +212,8 @@ function HomePage() {
   ];
 
   // Filter products based on search and category
-  const filteredProducts = mockProducts.filter(product => {
+  const allProducts = products.length > 0 ? products : mockProducts;
+  const filteredProducts = allProducts.filter(product => {
     const searchMatch = searchQuery === "" || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -203,7 +231,7 @@ function HomePage() {
   });
 
   const handleProductClick = (productId: string) => {
-    const product = mockProducts.find(p => p.id === productId);
+    const product = allProducts.find(p => p.id === productId);
     if (product) {
       // Adapt product for modal (convert single image to images array)
       const modalProduct = {
@@ -216,7 +244,7 @@ function HomePage() {
   };
 
   const handleAddToCart = (productId: string, size?: string, quantity: number = 1) => {
-    const product = mockProducts.find(p => p.id === productId);
+    const product = allProducts.find(p => p.id === productId);
     if (!product) return;
 
     const existingItem = cartItems.find(item => 
