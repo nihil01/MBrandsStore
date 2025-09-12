@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Switch, Route } from "wouter";
+import {useEffect, useState} from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,14 +12,13 @@ import ProductGrid from "@/components/ProductGrid";
 import ProductModal from "@/components/ProductModal";
 import ShoppingCart from "@/components/ShoppingCart";
 import Footer from "@/components/Footer";
-import ThemeToggle from "@/components/ThemeToggle";
-import NotFound from "@/pages/not-found";
 
 // Generated images
 import tshirtImage from '../src/attached_assets/generated_images/White_cotton_t-shirt_product_01744f91.png';
 import jeansImage from '../src/attached_assets/generated_images/Dark_blue_denim_jeans_50e62285.png';
 import jacketImage from '../src/attached_assets/generated_images/Black_leather_jacket_product_4db547f1.png';
 import sneakersImage from '../src/attached_assets/generated_images/White_athletic_sneakers_ac51adc5.png';
+import PreviewScreen from "@/components/PreviewScreen.tsx";
 
 interface Product {
   id: string;
@@ -56,8 +54,9 @@ function HomePage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+    const [previewShown, setPreviewShown] = useState<boolean>(false);
 
-    // ✅ only mock products, no server data
+    // mock products
     const mockProducts: Product[] = [
         {
             id: "1",
@@ -123,7 +122,6 @@ function HomePage() {
         },
     ];
 
-    // ✅ use only mockProducts
     const allProducts = mockProducts;
 
     const filteredProducts = allProducts.filter((product) => {
@@ -150,17 +148,13 @@ function HomePage() {
         if (product) {
             setSelectedProduct({
                 ...product,
-                images: [product.image, product.image, product.image], // mock multiple images
+                images: [product.image, product.image, product.image],
             });
             setIsProductModalOpen(true);
         }
     };
 
-    const handleAddToCart = (
-        productId: string,
-        size?: string,
-        quantity: number = 1
-    ) => {
+    const handleAddToCart = (productId: string, size?: string, quantity: number = 1) => {
         const product = allProducts.find((p) => p.id === productId);
         if (!product) return;
 
@@ -217,88 +211,90 @@ function HomePage() {
         }, 100);
     };
 
+
     return (
-        <div className="min-h-screen bg-background text-foreground">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-                <Header
-                    cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
-                    onCartClick={() => setIsCartOpen(true)}
-                    onSearchChange={setSearchQuery}
-                    onCategorySelect={handleCategorySelect}
+        !previewShown ? (
+            <PreviewScreen showPreview={setPreviewShown}/>
+        ) : (
+            <div className="min-h-screen bg-[#1a0f1f] text-[#f3d4ff]">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-[#edadff]">
+                    <Header
+                        cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+                        onCartClick={() => setIsCartOpen(true)}
+                        onSearchChange={setSearchQuery}
+                        onCategorySelect={handleCategorySelect}
+                        textColor="#edadff"
+                    />
+                </div>
+
+                {/* Hero Section */}
+                <Hero
+                    onShopNow={() =>
+                        document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    onViewCollection={() =>
+                        document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    highlightColor="#edadff"
                 />
-                <ThemeToggle />
-            </div>
 
-            {/* Hero Section */}
-            <Hero
-                onShopNow={() =>
-                    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })
-                }
-                onViewCollection={() =>
-                    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })
-                }
-            />
+                {/* Products Section */}
+                <div id="products">
+                    <ProductGrid
+                        products={filteredProducts}
+                        selectedCategory={selectedCategory}
+                        selectedSubcategory={selectedSubcategory}
+                        onProductClick={handleProductClick}
+                        onAddToCart={(id) => handleAddToCart(id)}
+                        onWishlist={(id) => console.log("Added to wishlist:", id)}
+                        highlightColor="#edadff"
+                    />
+                </div>
 
-            {/* Products Section */}
-            <div id="products">
-                <ProductGrid
-                    products={filteredProducts}
-                    selectedCategory={selectedCategory}
-                    selectedSubcategory={selectedSubcategory}
-                    onProductClick={handleProductClick}
-                    onAddToCart={(id) => handleAddToCart(id)}
-                    onWishlist={(id) => console.log("Added to wishlist:", id)}
+                {/* Footer */}
+                <Footer textColor="#edadff" />
+
+                {/* Product Modal */}
+                <ProductModal
+                    isOpen={isProductModalOpen}
+                    onClose={() => setIsProductModalOpen(false)}
+                    product={selectedProduct || undefined}
+                    onAddToCart={(id, size, qty) => {
+                        handleAddToCart(id, size, qty);
+                        setIsProductModalOpen(false);
+                    }}
+                    highlightColor="#edadff"
+                />
+
+                {/* Shopping Cart */}
+                <ShoppingCart
+                    items={cartItems}
+                    isOpen={isCartOpen}
+                    onOpenChange={setIsCartOpen}
+                    onUpdateQuantity={handleUpdateCartQuantity}
+                    onRemoveItem={handleRemoveFromCart}
+                    onCheckout={handleCheckout}
+                    highlightColor="#edadff"
                 />
             </div>
-
-            {/* Footer */}
-            <Footer />
-
-            {/* Product Modal */}
-            <ProductModal
-                isOpen={isProductModalOpen}
-                onClose={() => setIsProductModalOpen(false)}
-                product={selectedProduct || undefined}
-                onAddToCart={(id, size, qty) => {
-                    handleAddToCart(id, size, qty);
-                    setIsProductModalOpen(false);
-                }}
-            />
-
-            {/* Shopping Cart */}
-            <ShoppingCart
-                items={cartItems}
-                isOpen={isCartOpen}
-                onOpenChange={setIsCartOpen}
-                onUpdateQuantity={handleUpdateCartQuantity}
-                onRemoveItem={handleRemoveFromCart}
-                onCheckout={handleCheckout}
-            />
-        </div>
+        )
     );
 }
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="modern-style-theme">
         <TooltipProvider>
-          <Router />
-          <Toaster />
+            <Toaster />
+            <HomePage/>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  );
+);
 }
 
 export default App;
