@@ -3,27 +3,16 @@ import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-
-interface Product {
-    id: string;
-    name: string;
-    price: number;
-    originalPrice?: number;
-    image: string;
-    category: string;
-    subcategory?: string;
-    isNew?: boolean;
-    onSale?: boolean;
-}
+import {Product} from "@/App.tsx";
 
 interface ProductGridProps {
     products: Product[];
     highlightColor: string;
     selectedCategory?: string;
     selectedSubcategory?: string;
-    onProductClick?: (productId: string) => void;
-    onAddToCart?: (productId: string) => void;
-    onWishlist?: (productId: string) => void;
+    onProductClick?: (productId: number) => void;
+    onAddToCart?: (productId: number) => void;
+    onWishlist?: (productId: number) => void;
 }
 
 export default function ProductGrid({
@@ -41,14 +30,12 @@ export default function ProductGrid({
     const productsPerPage = 8;
 
     const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))];
-    const subcategories = selectedCategory && selectedCategory !== "all"
-        ? ["all", ...Array.from(new Set(products.filter(p => p.category === selectedCategory).map(p => p.subcategory).filter(Boolean)))]
-        : [];
+
 
     const filteredProducts = products
         .filter(product => {
             const categoryMatch = selectedCategory === "all" || product.category === selectedCategory || !selectedCategory;
-            const subcategoryMatch = selectedSubcategory === "all" || product.subcategory === selectedSubcategory || !selectedSubcategory;
+            const subcategoryMatch = selectedSubcategory === "all" || !selectedSubcategory;
             return categoryMatch && subcategoryMatch;
         })
         .sort((a, b) => {

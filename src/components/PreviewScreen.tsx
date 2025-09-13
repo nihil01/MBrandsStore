@@ -1,8 +1,8 @@
 import React from "react";
 import Slider from "react-slick";
-import { Button } from "@/components/ui/button";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { motion } from "framer-motion";
 
 const images = [
     "/assets/preview/1.jpeg",
@@ -50,21 +50,21 @@ export default function PreviewScreen(
                     />
                 </div>
 
-                <h1 className="text-[#edadff] text-4xl md:text-6xl font-bold mb-4">
+                <motion.h1 initial={{ scale: 0 }} animate={{ scale: 1}} transition={{ duration: 0.4 }}  className="text-[#edadff] text-4xl md:text-6xl font-bold mb-4">
                     Welcome to MBrandsStore
-                </h1>
+                </motion.h1>
 
-                <p className="text-[#f3d4ff] text-lg md:text-xl mb-6 max-w-2xl">
+                <motion.p initial={{ scale: 0 }} animate={{ scale: 1}} transition={{ duration: 0.4, delay: 0.5 }} className="text-[#f3d4ff] text-lg md:text-xl mb-6 max-w-2xl">
                     Discover the most stylish and high-quality products, all in one place.
-                </p>
+                </motion.p>
 
-                <Button
-                    size="lg"
+                <motion.button
+                    initial={{ scale: 0 }} animate={{ scale: 1}} transition={{ duration: 0.4, delay: 0.6 }}
                     className="bg-[#edadff] hover:bg-[#ffb3ff] text-[#2a1a2e] px-8 py-4 rounded-xl text-lg"
-                    onClick={() => showPreview ? showPreview(true) : null}
+                    onClick={() => showPreview ? showPreview(false) : null}
                 >
                     Go to Store
-                </Button>
+                </motion.button>
             </div>
         </div>
     );

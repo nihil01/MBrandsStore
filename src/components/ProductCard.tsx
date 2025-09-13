@@ -1,22 +1,23 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Heart, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Slider from "react-slick";
 
 interface ProductCardProps {
-    id: string;
+    id: number;
     highlightColor: string;
     name: string;
     price: number;
     originalPrice?: number;
-    image: string;
     category: string;
+    images: string;
     isNew?: boolean;
     onSale?: boolean;
-    onAddToCart?: (productId: string) => void;
-    onQuickView?: (productId: string) => void;
-    onWishlist?: (productId: string) => void;
+    onAddToCart?: (productId: number) => void;
+    onQuickView?: (productId: number) => void;
+    onWishlist?: (productId: number) => void;
 }
 
 export default function ProductCard({
@@ -24,7 +25,7 @@ export default function ProductCard({
                                         name,
                                         price,
                                         originalPrice,
-                                        image,
+                                        images,
                                         category,
                                         isNew = false,
                                         onSale = false,
@@ -34,7 +35,6 @@ export default function ProductCard({
                                         highlightColor
                                     }: ProductCardProps) {
     const [isWishlisted, setIsWishlisted] = useState(false);
-    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleWishlistClick = () => {
         setIsWishlisted(!isWishlisted);
@@ -49,20 +49,41 @@ export default function ProductCard({
         onQuickView?.(id);
     };
 
+    const props = {
+        dots: true,
+        infinite: true,
+        speed: 250,
+        autoplay: true,
+        autoplaySpeed: 4000,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: true,
+    }
+
     return (
-        <Card className="group hover-elevate overflow-hidden border-0 shadow-sm transform transition-all duration-300 hover:-translate-y-1 animate-in fade-in-0 duration-500" data-testid={`product-card-${id}`}>
+        <Card className="group hover-elevate overflow-hidden border-0 shadow-sm" data-testid={`product-card-${id}`}>
             <CardContent className="p-0">
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden bg-muted">
-                    <img
-                        src={image}
-                        alt={name}
-                        className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                            imageLoaded ? "opacity-100" : "opacity-0"
-                        }`}
-                        onLoad={() => setImageLoaded(true)}
-                    />
-                    {!imageLoaded && <div className="absolute inset-0 bg-muted animate-pulse" />}
+                    <Slider {...props} className="w-full h-screen">
+                        {(Array.isArray(images)
+                                ? images
+                                : images
+                                    ?.replace("[", "")
+                                    .replace("]", "")
+                                    .trim()
+                                    .split(",")
+                        )?.map((src, index) => (
+                            <div key={index} className="w-full h-screen">
+                                <img
+                                    src={"http://localhost:8080/static/"+src.trim()} // убираем лишние пробелы
+                                    alt={`preview-${index}`}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        ))}
+                    </Slider>
+
 
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-2">

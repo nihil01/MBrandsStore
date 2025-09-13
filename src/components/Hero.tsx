@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import HeroTitle from "@/components/HeroTitle.tsx";
 
 interface HeroProps {
     onShopNow?: () => void;
@@ -25,11 +26,7 @@ export default function Hero({ onShopNow, onViewCollection, highlightColor }: He
             {/* Content */}
             <div className="relative z-10 container mx-auto px-4 text-center">
                 <div className="max-w-4xl mx-auto">
-                    <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                        Modern Style
-                        <br />
-                        <span style={{ color: highlightColor }}>For Every</span> Moment
-                    </h1>
+                    <HeroTitle highlightColor={highlightColor}/>
 
                     <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto leading-relaxed text-white/80">
                         Discover our curated collection of premium clothing.

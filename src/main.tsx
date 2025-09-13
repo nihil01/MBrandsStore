@@ -4,14 +4,23 @@ import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NotFound from "../src/pages/not-found"
 import React from "react";
+import AdminDashboard from "@/components/Dashboard.tsx";
 
 
 const router = createBrowserRouter([
+
     {
         path: "/",
         element: <App />,
         errorElement: <NotFound />,
     },
+
+    {
+        path: "/admin",
+        element: <AdminDashboard />,
+        errorElement: <NotFound />,
+    },
+
 ]);
 
 
