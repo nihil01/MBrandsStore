@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 // Components
 import Header from "@/components/Header";
@@ -15,6 +14,7 @@ import PreviewScreen from "@/components/PreviewScreen.tsx";
 import {AnimatePresence, motion} from "framer-motion";
 import {AuthProvider} from "@/components/AuthContext.tsx";
 import {shopApi} from "@/lib/queryClient.ts";
+import {LanguageProvider} from "@/components/LanguageContext.tsx";
 
 export interface Product {
     id: number;
@@ -104,27 +104,25 @@ function HomePage() {
 
             {!showPreviewModal && (
 
-                <motion.div className="min-h-screen bg-[#1a0f1f] text-[#f3d4ff]">
+                <motion.div className="min-h-screen">
                     <Header
                         cartItemCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
                         onCartClick={() => setIsCartOpen(true)}
                         onSearchChange={setSearchQuery}
                         onCategorySelect={setSelectedCategory}
-                        textColor="#edadff"
                     />
 
-                    <Hero onShopNow={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })} highlightColor="#edadff" />
+                    <Hero/>
 
-                    <div id="products">
-                        <ProductGrid
-                            products={filteredProducts}
-                            onProductClick={handleProductClick}
-                            onAddToCart={(id) => handleAddToCart(id)}
-                            highlightColor="#edadff"
-                        />
-                    </div>
 
-                    <Footer textColor="#edadff" />
+                    <ProductGrid
+                        products={filteredProducts}
+                        onProductClick={handleProductClick}
+                        onAddToCart={(id) => handleAddToCart(id)}
+                    />
+
+
+                    <Footer />
 
                     <AnimatePresence>
                         {isProductModalOpen && selectedProduct && (
@@ -133,7 +131,7 @@ function HomePage() {
                                 onClose={() => setIsProductModalOpen(false)}
                                 product={selectedProduct}
                                 onAddToCart={handleAddToCart}
-                                highlightColor="#edadff"
+                                highlightColor={"#000000"}
                             />
                         )}
                     </AnimatePresence>
@@ -153,7 +151,6 @@ function HomePage() {
                                     setCartItems(prev => prev.filter(item => item.id !== itemId))
                                 }
                                 onCheckout={() => alert("Checkout (mock)")}
-                                highlightColor="#edadff"
                             />
                         )}
                     </AnimatePresence>
@@ -169,7 +166,7 @@ function HomePage() {
 
 export default function App() {
     return (
-        <ThemeProvider defaultTheme="light" storageKey="modern-style-theme">
+        <LanguageProvider>
             <TooltipProvider>
 
                 <Toaster />
@@ -179,6 +176,6 @@ export default function App() {
                 </AuthProvider>
 
             </TooltipProvider>
-        </ThemeProvider>
+        </LanguageProvider>
     );
 }

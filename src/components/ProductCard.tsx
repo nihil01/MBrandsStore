@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Heart, Plus } from "lucide-react";
+import {Eye, Heart, Plus} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Slider from "react-slick";
+import {useLanguage} from "@/components/LanguageContext.tsx";
 
 interface ProductCardProps {
     id: number;
@@ -20,149 +21,148 @@ interface ProductCardProps {
     onWishlist?: (productId: number) => void;
 }
 
-export default function ProductCard({
-                                        id,
-                                        name,
-                                        price,
-                                        originalPrice,
-                                        images,
-                                        category,
-                                        isNew = false,
-                                        onSale = false,
-                                        onAddToCart,
-                                        onQuickView,
-                                        onWishlist,
-                                        highlightColor
-                                    }: ProductCardProps) {
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    export default function ProductCard({
+                                            id,
+                                            name,
+                                            price,
+                                            originalPrice,
+                                            images,
+                                            category,
+                                            isNew = false,
+                                            onSale = false,
+                                            onAddToCart,
+                                            onQuickView,
+                                        }: ProductCardProps) {
+        const [isHovered, setIsHovered] = useState(false);
+        const {t} = useLanguage();
 
-    const handleWishlistClick = () => {
-        setIsWishlisted(!isWishlisted);
-        onWishlist?.(id);
-    };
+        const sliderSettings = {
+            dots: true,
+            infinite: true,
+            speed: 250,
+            autoplay: false,
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            arrows: false,
+        };
 
-    const handleAddToCart = () => {
-        onAddToCart?.(id);
-    };
+        const imageArray = Array.isArray(images)
+            ? images
+            : images?.replace("[", "").replace("]", "").trim().split(",") || [];
 
-    const handleQuickView = () => {
-        onQuickView?.(id);
-    };
+        const handleAddToCart = () => {
+            onAddToCart?.(id);
+        };
 
-    const props = {
-        dots: true,
-        infinite: true,
-        speed: 250,
-        autoplay: true,
-        autoplaySpeed: 4000,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        arrows: true,
-    }
+        const handleQuickView = () => {
+            console.log("QUICK VIEW")
+            onQuickView?.(id);
+        };
+
 
     return (
-        <Card className="group hover-elevate overflow-hidden border-0 shadow-sm" data-testid={`product-card-${id}`}>
+        <Card
+            className="group relative overflow-hidden border-gray-200 hover:border-gray-300 transition-all duration-300 bg-white hover:shadow-lg"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             <CardContent className="p-0">
-                {/* Image */}
-                <div className="relative aspect-square overflow-hidden bg-muted">
-                    <Slider {...props} className="w-full h-screen">
-                        {(Array.isArray(images)
-                                ? images
-                                : images
-                                    ?.replace("[", "")
-                                    .replace("]", "")
-                                    .trim()
-                                    .split(",")
-                        )?.map((src, index) => (
-                            <div key={index} className="w-full h-screen">
-                                <img
-                                    src={"http://localhost:8080/static/"+src.trim()} // убираем лишние пробелы
-                                    alt={`preview-${index}`}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        ))}
-                    </Slider>
-
+                {/* Image Container */}
+                <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                    {imageArray.length > 1 ? (
+                        <Slider {...sliderSettings}>
+                            {imageArray.map((src, index) => (
+                                <div key={index} className="relative aspect-square">
+                                    <img
+                                        src={src.trim()}
+                                        alt={`${name} - ${index + 1}`}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            ))}
+                        </Slider>
+                    ) : (
+                        <img
+                            src={imageArray[0]?.trim() || "/placeholder-image.jpg"}
+                            alt={name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                        />
+                    )}
 
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-2">
                         {isNew && (
-                            <Badge
-                                style={{ backgroundColor: highlightColor, color: "#1a1a1a" }}
-                                data-testid="badge-new"
-                            >
-                                New
+                            <Badge className="bg-black text-white text-xs font-medium px-2 py-1 rounded-sm">
+                                {t('product.new')}
                             </Badge>
                         )}
                         {onSale && (
-                            <Badge
-                                style={{ backgroundColor: highlightColor + "cc", color: "#1a1a1a" }}
-                                data-testid="badge-sale"
-                            >
-                                Sale
+                            <Badge className="bg-red-600 text-white text-xs font-medium px-2 py-1 rounded-sm">
+                                {t('product.sale')}
                             </Badge>
                         )}
                     </div>
 
-                    {/* Wishlist */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                        <Button
-                            size="icon"
-                            variant="outline"
-                            style={{ borderColor: highlightColor }}
-                            className="w-8 h-8"
-                            onClick={handleWishlistClick}
-                        >
-                            <Heart
-                                className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`}
-                                style={{ color: isWishlisted ? highlightColor : undefined }}
-                            />
-                        </Button>
-                    </div>
 
-                    {/* Quick View */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    {/* Add to Cart Overlay */}
+                    <div
+                        className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 transition-all duration-300 ${
+                            isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+                        }`}
+                    >
+
+                        {/* Quick View Button */}
                         <Button
-                            variant="outline"
+                            className="w-full bg-white text-black hover:bg-gray-100 font-medium py-2 px-4 rounded-sm transition-all duration-200 transform hover:scale-105"
                             onClick={handleQuickView}
-                            style={{ borderColor: highlightColor, color: highlightColor }}
-                            className="bg-background/80 backdrop-blur-sm transform scale-95 group-hover:scale-100 transition-transform duration-200"
+                            style={{transitionDelay: '50ms'}}
                         >
-                            Quick View
+                            <Eye className="h-4 w-4"/>
+                        </Button>
+
+                        <Button
+                            onClick={handleAddToCart}
+                            className="w-full bg-white text-black hover:bg-gray-100 font-medium py-2 px-4 rounded-sm transition-all duration-200 transform hover:scale-105"
+                        >
+                            <Plus className="h-4 w-4 mr-2"/>
+                            {t('product.addToCart')}
                         </Button>
                     </div>
                 </div>
 
                 {/* Product Info */}
                 <div className="p-4">
-                    <div style={{ color: highlightColor }} className="text-sm mb-1">
+                    {/* Category */}
+                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1 font-medium">
                         {category}
-                    </div>
-                    <h3 style={{ color: highlightColor }} className="font-semibold mb-2 line-clamp-2">
+                    </p>
+
+                    {/* Product Name */}
+                    <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem]">
                         {name}
                     </h3>
 
                     {/* Price */}
-                    <div className="flex items-center gap-2 mb-3">
-            <span style={{ color: highlightColor }} className="text-lg font-bold">
-              ${price.toFixed(2)}
-            </span>
+                    <div className="flex items-center gap-2">
+       <span className="text-lg font-bold text-gray-900">
+         ${price.toFixed(2)}
+       </span>
                         {originalPrice && originalPrice > price && (
-                            <span style={{ color: highlightColor + "aa" }} className="text-sm line-through">
-                ${originalPrice.toFixed(2)}
-              </span>
+                            <span className="text-sm text-gray-500 line-through">
+           ${originalPrice.toFixed(2)}
+         </span>
                         )}
                     </div>
 
-                    {/* Add to Cart */}
+                    {/* Mobile Add to Cart (visible on small screens) */}
                     <Button
                         onClick={handleAddToCart}
-                        style={{ backgroundColor: highlightColor, color: "#1a1a1a" }}
-                        className="w-full gap-2 transform transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="w-full mt-3 bg-black text-white hover:bg-gray-800 font-medium py-2 px-4 rounded-sm transition-colors sm:hidden"
                     >
-                        <Plus className="w-4 h-4" />
-                        Add to Cart
+                        <Plus className="h-4 w-4 mr-2"/>
+                        {t('product.addToCart')}
                     </Button>
                 </div>
             </CardContent>

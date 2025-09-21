@@ -17,7 +17,7 @@ export const adminApi = {
             }
         });
 
-        const res = await fetch("http://localhost:8080/api/v1/products/add", {
+        const res = await fetch("/api/v1/products/add", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${this.getToken()}`,
@@ -31,7 +31,7 @@ export const adminApi = {
     },
 
     async getProducts() {
-        const res = await fetch("http://localhost:8080/api/v1/products", {
+        const res = await fetch("/api/v1/products", {
             headers: {
                 Authorization: `Bearer ${this.getToken()}`,
             },
@@ -41,7 +41,7 @@ export const adminApi = {
     },
 
     async deleteProduct(id: number) {
-        const res = await fetch(`http://localhost:8080/api/v1/products/${id}`, {
+        const res = await fetch(`/api/v1/products/${id}`, {
             method: "DELETE",
             headers: {
                 Authorization: `Bearer ${this.getToken()}`,
@@ -60,7 +60,7 @@ export const adminApi = {
             }
         });
 
-        const res = await fetch(`http://localhost:8080/api/v1/products/${id}`, {
+        const res = await fetch(`/api/v1/products/${id}`, {
             method: "PUT",
             body: formData,
             headers: {
@@ -76,7 +76,7 @@ export const adminApi = {
 
 export const shopApi = {
     getProducts: async (): Promise<Product[]> => {
-        const res = await fetch("http://localhost:8080/api/v1/products"); // твой бэкенд
+        const res = await fetch("/api/v1/products"); // твой бэкенд
         if (!res.ok) throw new Error("Failed to fetch products");
         return res.json();
     },

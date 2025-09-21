@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Product } from "@/App.tsx";
 import Slider from "react-slick";
+import {useLanguage} from "@/components/LanguageContext.tsx";
 
 interface ProductModalProps {
     isOpen: boolean;
@@ -20,8 +21,7 @@ export default function ProductModal({ isOpen, onClose, product, onAddToCart, hi
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState("");
     const [quantity, setQuantity] = useState(1);
-    const [isWishlisted, setIsWishlisted] = useState(false);
-
+    const { t } = useLanguage();
     if (!product) return null;
 
     // Нормализуем изображения в массив
@@ -39,10 +39,6 @@ export default function ProductModal({ isOpen, onClose, product, onAddToCart, hi
             return;
         }
         onAddToCart?.(product.id, selectedSize, quantity);
-    };
-
-    const handleWishlist = () => {
-        setIsWishlisted(!isWishlisted);
     };
 
     const sliderProps = {
@@ -80,7 +76,7 @@ export default function ProductModal({ isOpen, onClose, product, onAddToCart, hi
                                 {imagesArray.map((src, index) => (
                                     <div key={index} className="w-full h-screen">
                                         <img
-                                            src={"http://localhost:8080/static/" + src}
+                                            src={"/static/" + src}
                                             alt={`preview-${index}`}
                                             className="w-full h-full object-cover"
                                         />
@@ -99,7 +95,7 @@ export default function ProductModal({ isOpen, onClose, product, onAddToCart, hi
                                         style={{ borderColor: selectedImage === index ? highlightColor : "#d1d5db" }}
                                     >
                                         <img
-                                            src={"http://localhost:8080/static/" + image}
+                                            src={"/static/" + image}
                                             alt={`${product.name} view ${index + 1}`}
                                             className="w-full h-full object-cover"
                                         />
@@ -129,17 +125,16 @@ export default function ProductModal({ isOpen, onClose, product, onAddToCart, hi
                         <Separator style={{ borderColor: highlightColor }} />
 
                         <div>
-                            <h3 style={{ color: highlightColor }} className="font-semibold mb-2">Description</h3>
+                            <h3 style={{ color: highlightColor }} className="font-semibold mb-2">{t('productModal.description')}</h3>
                             <p style={{ color: highlightColor, opacity: 0.85 }} className="leading-relaxed">{product.description}</p>
                         </div>
 
-                        {/* Size Selection */}
                         {product.size && (
                             <div>
-                                <h3 style={{ color: highlightColor }} className="font-semibold mb-3">Size</h3>
+                                <h3 style={{ color: highlightColor }} className="font-semibold mb-3">{t('productModal.size')}</h3>
                                 <Select onValueChange={setSelectedSize}>
                                     <SelectTrigger className="w-full" style={{ borderColor: highlightColor }}>
-                                        <SelectValue placeholder="Select a size" style={{ color: highlightColor }} />
+                                        <SelectValue placeholder={t('productModal.selectSizePlaceholder')} style={{ color: highlightColor }} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value={product.size}>{product.size}</SelectItem>
@@ -150,7 +145,7 @@ export default function ProductModal({ isOpen, onClose, product, onAddToCart, hi
 
                         {/* Quantity */}
                         <div>
-                            <h3 style={{ color: highlightColor }} className="font-semibold mb-3">Quantity</h3>
+                            <h3 style={{ color: highlightColor }} className="font-semibold mb-3">{t('productModal.quantity')}</h3>
                             <div className="flex items-center gap-3">
                                 <Button
                                     variant="outline"
@@ -181,14 +176,6 @@ export default function ProductModal({ isOpen, onClose, product, onAddToCart, hi
                                 style={{ backgroundColor: highlightColor, color: "#fff" }}
                             >
                                 Add to Cart
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                onClick={handleWishlist}
-                                style={{ borderColor: highlightColor, color: isWishlisted ? "red" : highlightColor }}
-                            >
-                                <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                             </Button>
                         </div>
                     </div>

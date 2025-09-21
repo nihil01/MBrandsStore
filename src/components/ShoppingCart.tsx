@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { CartItem } from "@/App.tsx";
+import { useLanguage } from "@/components/LanguageContext";
 
 interface ShoppingCartProps {
     items?: CartItem[];
@@ -12,7 +13,6 @@ interface ShoppingCartProps {
     onUpdateQuantity?: (itemId: number, quantity: number) => void;
     onRemoveItem?: (itemId: number) => void;
     onCheckout?: () => void;
-    highlightColor: string;
 }
 
 export default function ShoppingCart({
@@ -22,9 +22,9 @@ export default function ShoppingCart({
                                          onUpdateQuantity,
                                          onRemoveItem,
                                          onCheckout,
-                                         highlightColor,
                                      }: ShoppingCartProps) {
-    const [localItems, setLocalItems] = useState<CartItem[]>(items);
+    const [localItems, setLocalItems] = useState(items);
+    const { t } = useLanguage();
 
     // Sync with props if items change
     useEffect(() => {
@@ -58,135 +58,143 @@ export default function ShoppingCart({
         console.log('Proceeding to checkout with items:', localItems);
     };
 
+    const totalItemCount = localItems.reduce((sum, item) => sum + item.quantity, 0);
+
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
-            <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative" style={{ color: highlightColor }}>
-                    <ShoppingBag className="w-5 h-5" />
-                    {localItems.length > 0 && (
-                        <span className="absolute -top-1 -right-1 text-xs rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: highlightColor, color: "#fff" }}>
-                            {localItems.reduce((sum, item) => sum + item.quantity, 0)}
-                        </span>
-                    )}
-                </Button>
-            </SheetTrigger>
-
-            <SheetContent className="w-full sm:max-w-lg">
-                <SheetHeader>
-                    <SheetTitle className="text-left" style={{ color: highlightColor }}>
-                        Shopping Cart ({localItems.reduce((sum, item) => sum + item.quantity, 0)})
+            <SheetContent className="w-full sm:w-96 bg-white border-l border-gray-200">
+                <SheetHeader className="pb-4 border-b border-gray-200">
+                    <SheetTitle className="flex items-center text-lg font-semibold text-gray-900">
+                        <ShoppingBag className="h-5 w-5 mr-2" />
+                        {t('cart.title')} ({totalItemCount})
                     </SheetTitle>
                 </SheetHeader>
 
                 <div className="flex flex-col h-full">
                     {/* Cart Items */}
-                    <div className="flex-1 overflow-y-auto py-6">
+                    <div className="flex-1 overflow-y-auto py-4">
                         {localItems.length === 0 ? (
-                            <div className="text-center py-12">
-                                <ShoppingBag className="w-16 h-16 mx-auto mb-4" style={{ color: highlightColor }} />
-                                <h3 className="text-lg font-semibold mb-2" style={{ color: highlightColor }}>Your cart is empty</h3>
-                                <p className="text-sm" style={{ color: highlightColor, opacity: 0.7 }}>Add some products to get started</p>
+                            <div className="flex flex-col items-center justify-center h-64 text-center">
+                                <ShoppingBag className="h-16 w-16 text-gray-300 mb-4" />
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                    {t('cart.empty')}
+                                </h3>
+                                <p className="text-gray-600">
+                                    {t('cart.emptyDescription')}
+                                </p>
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {localItems.map((item) => (
-                                    <div key={item.id} className="flex gap-4 p-4 rounded-lg border" style={{ borderColor: highlightColor }}>
-                                        <img
-                                            src={item.images?.[0] ?? ""}
-                                            alt={item.name}
-                                            className="w-16 h-16 object-cover rounded-md"
-                                        />
+                                {localItems.map((item) => {
+                                    const imageArray = Array.isArray(item.images)
+                                        ? item.images
+                                        : item.images?.replace("[", "").replace("]", "").trim().split(",") || [];
+                                    const imageUrl = imageArray[0]?.trim() || "/placeholder-image.jpg";
 
-                                        <div className="flex-1">
-                                            <h4 className="font-semibold mb-1" style={{ color: highlightColor }}>{item.name}</h4>
-                                            {item.size && (
-                                                <p className="text-sm mb-1" style={{ color: highlightColor, opacity: 0.7 }}>
-                                                    Size: {item.size}
+                                    return (
+                                        <div key={`${item.id}-${item.size}`} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
+                                            <div className="flex-shrink-0">
+                                                <img
+                                                    src={imageUrl}
+                                                    alt={item.name}
+                                                    className="w-16 h-16 object-cover rounded-md bg-white"
+                                                />
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium text-gray-900 truncate text-sm">
+                                                    {item.name}
+                                                </h4>
+
+                                                {item.size && (
+                                                    <p className="text-xs text-gray-600 mt-1">
+                                                        {t('cart.size')}: {item.size}
+                                                    </p>
+                                                )}
+
+                                                <p className="font-semibold text-gray-900 text-sm mt-1">
+                                                    ${item.price.toFixed(2)}
                                                 </p>
-                                            )}
-                                            <p className="text-sm font-semibold" style={{ color: highlightColor }}>
-                                                ${item.price.toFixed(2)}
-                                            </p>
 
-                                            {/* Quantity Controls */}
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <Button
-                                                    size="icon"
-                                                    variant="outline"
-                                                    className="w-8 h-8"
-                                                    style={{ borderColor: highlightColor, color: highlightColor }}
-                                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                >
-                                                    <Minus className="w-3 h-3" />
-                                                </Button>
+                                                {/* Quantity Controls */}
+                                                <div className="flex items-center justify-between mt-2">
+                                                    <div className="flex items-center space-x-2">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-7 w-7 p-0 border-gray-300 hover:bg-gray-100"
+                                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        >
+                                                            <Minus className="h-3 w-3" />
+                                                        </Button>
 
-                                                <span className="w-8 text-center font-semibold" style={{ color: highlightColor }}>
-                                                    {item.quantity}
-                                                </span>
+                                                        <span className="font-medium text-sm min-w-[1.5rem] text-center">
+                             {item.quantity}
+                           </span>
 
-                                                <Button
-                                                    size="icon"
-                                                    variant="outline"
-                                                    className="w-8 h-8"
-                                                    style={{ borderColor: highlightColor, color: highlightColor }}
-                                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                >
-                                                    <Plus className="w-3 h-3" />
-                                                </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-7 w-7 p-0 border-gray-300 hover:bg-gray-100"
+                                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        >
+                                                            <Plus className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                                                        onClick={() => removeItem(item.id)}
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="w-8 h-8"
-                                            style={{ color: highlightColor }}
-                                            onClick={() => removeItem(item.id)}
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
 
                     {/* Cart Summary */}
                     {localItems.length > 0 && (
-                        <div className="border-t pt-6" style={{ borderColor: highlightColor }}>
+                        <div className="border-t border-gray-200 pt-4 mt-4 space-y-4">
                             <div className="space-y-3">
                                 <div className="flex justify-between text-sm">
-                                    <span style={{ color: highlightColor }}>Subtotal</span>
-                                    <span style={{ color: highlightColor }}>${subtotal.toFixed(2)}</span>
+                                    <span className="text-gray-600">{t('cart.subtotal')}</span>
+                                    <span className="font-medium text-gray-900">${subtotal.toFixed(2)}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm">
-                                    <span style={{ color: highlightColor }}>Shipping</span>
-                                    <span style={{ color: highlightColor }}>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+                                    <span className="text-gray-600">{t('cart.shipping')}</span>
+                                    <span className="font-medium text-gray-900">
+                   {shipping === 0 ? t('cart.free') : `$${shipping.toFixed(2)}`}
+                 </span>
                                 </div>
 
-                                <Separator style={{ borderColor: highlightColor }} />
+                                <Separator className="bg-gray-200" />
 
-                                <div className="flex justify-between font-semibold text-lg">
-                                    <span style={{ color: highlightColor }}>Total</span>
-                                    <span style={{ color: highlightColor }}>${total.toFixed(2)}</span>
+                                <div className="flex justify-between">
+                                    <span className="font-semibold text-gray-900">{t('cart.total')}</span>
+                                    <span className="font-bold text-lg text-gray-900">${total.toFixed(2)}</span>
                                 </div>
-
-                                <Button
-                                    onClick={handleCheckout}
-                                    className="w-full mt-6"
-                                    size="lg"
-                                    style={{ backgroundColor: highlightColor, color: "#fff" }}
-                                >
-                                    Checkout
-                                </Button>
 
                                 {subtotal < 100 && (
-                                    <p className="text-sm text-center" style={{ color: highlightColor, opacity: 0.7 }}>
-                                        Add ${(100 - subtotal).toFixed(2)} more for free shipping
+                                    <p className="text-xs text-center text-gray-600 bg-gray-50 p-2 rounded">
+                                        {t('cart.freeShipping')} ${(100 - subtotal).toFixed(2)} {t('cart.freeShippingMore')}
                                     </p>
                                 )}
                             </div>
+
+                            <Button
+                                onClick={handleCheckout}
+                                className="w-full bg-black text-white hover:bg-gray-800 font-medium py-3 rounded-md transition-colors"
+                            >
+                                {t('cart.checkout')}
+                            </Button>
                         </div>
                     )}
                 </div>

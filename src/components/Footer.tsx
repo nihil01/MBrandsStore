@@ -1,91 +1,168 @@
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useLanguage } from "@/components/LanguageContext";
 
-export default function Footer({ textColor }: { textColor: string }) {
-    const handleNewsletterSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log("Newsletter subscription submitted");
-    };
+export default function Footer() {
+    const { t } = useLanguage();
 
-    const linkStyle = { color: textColor, textDecoration: "none" };
+    const footerSections = [
+        {
+            title: t('footer.company'),
+            links: [
+                { name: t('footer.about'), href: '#' },
+                { name: t('footer.careers'), href: '#' },
+                { name: t('footer.contact'), href: '#' },
+            ],
+        },
+        {
+            title: t('footer.help'),
+            links: [
+                { name: t('footer.shipping'), href: '#' },
+                { name: t('footer.returns'), href: '#' },
+                { name: t('footer.sizeGuide'), href: '#' },
+            ],
+        },
+        {
+            title: t('footer.legal'),
+            links: [
+                { name: t('footer.privacy'), href: '#' },
+                { name: t('footer.terms'), href: '#' },
+                { name: t('footer.cookies'), href: '#' },
+            ],
+        },
+    ];
+
+    const socialLinks = [
+        { name: 'Instagram', href: '#', icon: '📷' },
+        { name: 'Facebook', href: '#', icon: '👤' },
+        { name: 'Twitter', href: '#', icon: '🐦' },
+        { name: 'YouTube', href: '#', icon: '📺' },
+    ];
 
     return (
-        <footer className="bg-card border-t border-border">
-            <div className="container mx-auto px-4 py-12">
-                {/* Main Footer */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-                    {/* Company Info */}
-                    <div className="space-y-4">
-                        <h3 style={{ color: textColor }} className="text-xl font-bold">ModernStyle</h3>
-                        <p style={{ color: textColor }} className="leading-relaxed">
-                            Curating premium clothing with modern designs, quality materials, and timeless style.
-                        </p>
-                        <div className="flex space-x-4">
-                            <Button variant="ghost" size="icon"><Facebook style={{ color: textColor }} /></Button>
-                            <Button variant="ghost" size="icon"><Instagram style={{ color: textColor }} /></Button>
-                            <Button variant="ghost" size="icon"><Twitter style={{ color: textColor }} /></Button>
+        <footer className="bg-white border-t border-gray-200">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Main Footer Content */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+
+                    {/* Brand Section */}
+                    <div className="lg:col-span-2">
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900">MBrands</h2>
+                            <p className="mt-2 text-gray-600 max-w-sm">
+                                {t('hero.subtitle')}
+                            </p>
+                        </div>
+
+                        {/* Social Links */}
+                        <div>
+
+                            <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
+                                (24/7) Tel: +994559825989
+                            </h3>
+
+                            <a className={"text-"} href={`https://wa.me/994559825989`}>WhatsApp link</a>
+
+                            <div className="flex space-x-4">
+                                {socialLinks.map((social) => (
+                                    <a
+                                        key={social.name}
+                                        href={social.href}
+                                        className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+                                        aria-label={social.name}
+                                    >
+                                        <span className="text-lg">{social.icon}</span>
+                                    </a>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Quick Links */}
-                    <div className="space-y-4">
-                        <h4 style={{ color: textColor }} className="font-semibold">Quick Links</h4>
-                        <ul className="space-y-2">
-                            {["New Arrivals", "Best Sellers", "Sale", "Gift Cards", "Size Guide"].map(link => (
-                                <li key={link}>
-                                    <a href="#" style={linkStyle} className="hover:underline">{link}</a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Customer Service */}
-                    <div className="space-y-4">
-                        <h4 style={{ color: textColor }} className="font-semibold">Customer Service</h4>
-                        <ul className="space-y-2">
-                            {["Contact Us", "Shipping Info", "Returns", "FAQ", "Track Order"].map(link => (
-                                <li key={link}>
-                                    <a href="#" style={linkStyle} className="hover:underline">{link}</a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
+                    {/* Footer Links */}
+                    {footerSections.map((section) => (
+                        <div key={section.title}>
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">
+                                {section.title}
+                            </h3>
+                            <ul className="space-y-3">
+                                {section.links.map((link) => (
+                                    <li key={link.name}>
+                                        <a
+                                            href={link.href}
+                                            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                                        >
+                                            {link.name}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
                 </div>
 
-                <Separator className="my-8" />
+                {/* Separator */}
+                <Separator className="my-8 bg-gray-200" />
 
-                {/* Contact Info & Trust */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    {/* Contact Info */}
-                    <div className="space-y-3">
-                        <h4 style={{ color: textColor }} className="font-semibold">Contact Information</h4>
-                        <div style={{ color: textColor }} className="space-y-2">
-                            <div className="flex items-center gap-2"><MapPin className="w-4 h-4" />123 Fashion Street, Style City</div>
-                            <div className="flex items-center gap-2"><Phone className="w-4 h-4" />+1 (555) 123-4567</div>
-                            <div className="flex items-center gap-2"><Mail className="w-4 h-4" />support@modernstyle.com</div>
-                        </div>
-                    </div>
+                {/* Bottom Footer */}
+                <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
 
-                    {/* Trust Badges */}
-                    <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            {[
-                                { title: "Secure Payment", desc: "SSL encrypted checkout" },
-                                { title: "24/7 Support", desc: "Customer service" },
-                            ].map(item => (
-                                <div key={item.title}>
-                                    <div style={{ color: textColor }} className="font-medium">{item.title}</div>
-                                    <div style={{ color: textColor }}>{item.desc}</div>
+                    {/* Payment Methods */}
+                    <div className="flex items-center space-x-4">
+                        <span className="text-sm text-gray-600">Payment methods:</span>
+                        <div className="flex space-x-2">
+                            {['💳', '🏦', '💰', '📱'].map((icon, index) => (
+                                <div
+                                    key={index}
+                                    className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center"
+                                >
+                                    <span className="text-sm">{icon}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
+
+                    {/* Copyright */}
+                    <div className="text-sm text-gray-600 text-center md:text-right">
+                        <p>© {new Date().getFullYear()} MBrands. {t('footer.rights')}</p>
+                    </div>
                 </div>
 
-                <Separator className="my-8" />
+                {/* Features Bar */}
+                <div className="mt-8 pt-8 border-t border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                <span className="text-lg">🚚</span>
+                            </div>
+                            <div>
+                                <h4 className="font-medium text-gray-900 text-sm">Free Shipping</h4>
+                                <p className="text-xs text-gray-600">On orders over $200</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                <span className="text-lg">↩️</span>
+                            </div>
+                            <div>
+                                <h4 className="font-medium text-gray-900 text-sm">Easy Returns</h4>
+                                <p className="text-xs text-gray-600">30-day return policy</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                <span className="text-lg">🔒</span>
+                            </div>
+                            <div>
+                                <h4 className="font-medium text-gray-900 text-sm">Secure Checkout</h4>
+                                <p className="text-xs text-gray-600">SSL encrypted payments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </footer>
     );

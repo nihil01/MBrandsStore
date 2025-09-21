@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const fetchRole = async () => {
             try {
-                const res = await fetch("http://localhost:8080/api/v1/auth/role", {
+                const res = await fetch("/api/v1/auth/role", {
                     headers: {
                         Authorization: `Bearer ${storedToken}`,
                     },

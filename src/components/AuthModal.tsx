@@ -31,7 +31,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                 ? { email, password }
                 : { email, password, name, surname, mobileNumber };
 
-            const res = await fetch(`http://localhost:8080/api/v1/auth/${endpoint}`, {
+            const res = await fetch(`/api/v1/auth/${endpoint}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -45,6 +45,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                 localStorage.setItem("authToken", data.token);
                 console.log("Success:", data.message);
                 onClose(); // закрываем модалку
+                location.reload();
             } else {
                 setError(data.message || "Something went wrong");
             }
@@ -78,7 +79,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                     <X className="w-5 h-5" />
                 </button>
 
-                <h2 className="text-2xl font-bold text-center mb-4 text-purple-600">
+                <h2 className="text-2xl font-bold text-center mb-4 text-black">
                     {isLogin ? "Login" : "Register"}
                 </h2>
 
@@ -94,7 +95,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                                 placeholder="Name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="p-2 rounded-lg border focus:outline-purple-500"
+                                className="p-2 rounded-lg border"
                                 required
                             />
                             <input
@@ -102,7 +103,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                                 placeholder="Surname"
                                 value={surname}
                                 onChange={(e) => setSurname(e.target.value)}
-                                className="p-2 rounded-lg border focus:outline-purple-500"
+                                className="p-2 rounded-lg border"
                                 required
                             />
                             <input
@@ -110,7 +111,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                                 placeholder="Mobile number"
                                 value={mobileNumber}
                                 onChange={(e) => setMobileNumber(e.target.value)}
-                                className="p-2 rounded-lg border focus:outline-purple-500"
+                                className="p-2 rounded-lg border"
                                 required
                             />
                         </>
@@ -121,7 +122,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="p-2 rounded-lg border focus:outline-purple-500"
+                        className="p-2 rounded-lg border"
                         required
                     />
                     <input
@@ -129,13 +130,13 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="p-2 rounded-lg border focus:outline-purple-500"
+                        className="p-2 rounded-lg border"
                         required
                     />
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition"
+                        className="text-black py-2 rounded-lg border-black border-2"
                     >
                         {loading ? "Please wait..." : isLogin ? "Login" : "Register"}
                     </button>
@@ -145,7 +146,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                     {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
                     <button
                         onClick={() => setIsLogin(!isLogin)}
-                        className="text-purple-600 font-semibold"
+                        className="text-black"
                     >
                         {isLogin ? "Register" : "Login"}
                     </button>

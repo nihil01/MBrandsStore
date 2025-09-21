@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {Product} from "@/App.tsx";
+import { useLanguage } from "@/components/LanguageContext";
 
 interface ProductGridProps {
     products: Product[];
-    highlightColor: string;
     selectedCategory?: string;
     selectedSubcategory?: string;
     onProductClick?: (productId: number) => void;
@@ -22,15 +22,14 @@ export default function ProductGrid({
                                         onProductClick,
                                         onAddToCart,
                                         onWishlist,
-                                        highlightColor
                                     }: ProductGridProps) {
     const [localSelectedCategory, setLocalSelectedCategory] = useState("all");
     const [sortBy, setSortBy] = useState("newest");
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 8;
+    const { t } = useLanguage();
 
     const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))];
-
 
     const filteredProducts = products
         .filter(product => {
@@ -62,65 +61,63 @@ export default function ProductGrid({
     };
 
     return (
-        <section className="container mx-auto px-4 py-12">
+        <div className="w-full">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                <div>
-                    <h2
-                        className="text-3xl font-bold mb-2"
-                        style={{ color: highlightColor }}
-                        data-testid="products-title"
-                    >
-                        Our Collection
-                    </h2>
-                    <p className="mb-2" style={{ color: highlightColor + "aa" }} data-testid="products-subtitle">
-                        Discover our curated selection of premium clothing
-                    </p>
+            <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    {t('products.title')}
+                </h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                    {t('products.description')}
+                </p>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-between items-start sm:items-center">
+                {/* Category Filter */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
+                    <label className="text-sm font-medium text-gray-700">
+                        {t('products.category')}
+                    </label>
+                    <Select value={localSelectedCategory} onValueChange={handleCategoryChange}>
+                        <SelectTrigger className="w-full sm:w-48 border-gray-300 focus:border-gray-500 focus:ring-gray-500">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {categories.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                    {category === "all" ? t('products.allCategories') : category}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
 
-                {/* Filters */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Category Filter */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium" style={{ color: highlightColor }}>Category</label>
-                        <Select value={selectedCategory} onValueChange={handleCategoryChange} data-testid="select-category">
-                            <SelectTrigger className="w-[180px]" style={{ borderColor: highlightColor }}>
-                                <SelectValue style={{ color: highlightColor }} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {categories.map((category) => (
-                                    <SelectItem key={category} value={category} style={{ color: highlightColor }}>
-                                        {category === "all" ? "All Categories" : category}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Sort Filter */}
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium" style={{ color: highlightColor }}>Sort By</label>
-                        <Select value={sortBy} onValueChange={handleSortChange} data-testid="select-sort">
-                            <SelectTrigger className="w-[180px]" style={{ borderColor: highlightColor }}>
-                                <SelectValue style={{ color: highlightColor }} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="newest" style={{ color: highlightColor }}>Newest</SelectItem>
-                                <SelectItem value="price-low" style={{ color: highlightColor }}>Price: Low to High</SelectItem>
-                                <SelectItem value="price-high" style={{ color: highlightColor }}>Price: High to Low</SelectItem>
-                                <SelectItem value="name" style={{ color: highlightColor }}>Name</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                {/* Sort Filter */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
+                    <label className="text-sm font-medium text-gray-700">
+                        {t('products.sortBy')}
+                    </label>
+                    <Select value={sortBy} onValueChange={handleSortChange}>
+                        <SelectTrigger className="w-full sm:w-48 border-gray-300 focus:border-gray-500 focus:ring-gray-500">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="newest">{t('products.newest')}</SelectItem>
+                            <SelectItem value="price-low">{t('products.priceLowHigh')}</SelectItem>
+                            <SelectItem value="price-high">{t('products.priceHighLow')}</SelectItem>
+                            <SelectItem value="name">{t('products.name')}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
             {/* Results Info */}
-            <div className="flex items-center justify-between mb-6">
-                <p style={{ color: highlightColor }} data-testid="products-count">
-                    Showing {paginatedProducts.length} of {filteredProducts.length} products
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                <p className="text-sm text-gray-600 mb-2 sm:mb-0">
+                    {t('products.showing')} {paginatedProducts.length} {t('products.of')} {filteredProducts.length} {t('products.products')}
                     {selectedCategory && selectedCategory !== "all" && (
-                        <Badge style={{ backgroundColor: highlightColor, color: "#1a1a1a" }} className="ml-2">
+                        <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-700">
                             {selectedCategory}
                         </Badge>
                     )}
@@ -129,54 +126,55 @@ export default function ProductGrid({
 
             {/* Product Grid */}
             {paginatedProducts.length === 0 ? (
-                <div className="text-center py-12" data-testid="no-products">
-                    <p style={{ color: highlightColor }} className="text-lg">No products found</p>
-                    <p style={{ color: highlightColor + "aa" }}>Try adjusting your filters</p>
+                <div className="text-center py-16">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {t('products.noProducts')}
+                    </h3>
+                    <p className="text-gray-600">
+                        {t('products.tryFilters')}
+                    </p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
                     {paginatedProducts.map((product, index) => (
-                        <div
+                        <ProductCard
                             key={product.id}
-                            className="animate-in fade-in-0 duration-500"
-                            style={{ animationDelay: `${index * 100}ms` }}
-                        >
-                            <ProductCard
-                                {...product}
-                                onAddToCart={onAddToCart}
-                                onQuickView={onProductClick}
-                                onWishlist={onWishlist}
-                                highlightColor={highlightColor}
-                            />
-                        </div>
+                            id={product.id}
+                            name={product.name}
+                            price={product.price}
+                            category={product.category}
+                            images={product.images}
+                            highlightColor="#000000"
+                            onAddToCart={onAddToCart}
+                            onQuickView={onProductClick}
+                        />
                     ))}
                 </div>
             )}
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2" data-testid="pagination">
+                <div className="flex justify-center items-center space-x-2">
                     <Button
                         variant="outline"
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
-                        style={{ borderColor: highlightColor, color: highlightColor }}
+                        className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                     >
-                        Previous
+                        {t('common.previous')}
                     </Button>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex space-x-1">
                         {[...Array(totalPages)].map((_, i) => (
                             <Button
-                                key={i + 1}
+                                key={i}
                                 variant={currentPage === i + 1 ? "default" : "outline"}
                                 onClick={() => setCurrentPage(i + 1)}
-                                className="w-10"
-                                style={{
-                                    backgroundColor: currentPage === i + 1 ? highlightColor : undefined,
-                                    color: currentPage === i + 1 ? "#1a1a1a" : highlightColor,
-                                    borderColor: highlightColor,
-                                }}
+                                className={
+                                    currentPage === i + 1
+                                        ? "bg-black text-white hover:bg-gray-800"
+                                        : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                                }
                             >
                                 {i + 1}
                             </Button>
@@ -185,14 +183,14 @@ export default function ProductGrid({
 
                     <Button
                         variant="outline"
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages}
-                        style={{ borderColor: highlightColor, color: highlightColor }}
+                        className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                     >
-                        Next
+                        {t('common.next')}
                     </Button>
                 </div>
             )}
-        </section>
+        </div>
     );
 }
